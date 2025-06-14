@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7-Day Course Learning Schedule</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .day-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .day-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .day-header {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .day-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+            opacity: 0;
+        }
+
+        .day-card:hover .day-header::before {
+            opacity: 1;
+            transform: rotate(45deg) translateX(100%);
+        }
+
+        .day-name {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .day-time {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .day-content {
+            padding: 25px;
+        }
+
+        .course-item {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 5px solid #ff6b6b;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .course-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .course-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .course-time {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .course-description {
+            font-size: 0.85rem;
+            color: #777;
+            line-height: 1.4;
+        }
+
+        .total-hours {
+            background: linear-gradient(135deg, #48cae4, #0077b6);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            text-align: center;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+
+        /* Day-specific header colors */
+        .monday .day-header { background: linear-gradient(135deg, #ff6b6b, #feca57); }
+        .tuesday .day-header { background: linear-gradient(135deg, #48cae4, #0077b6); }
+        .wednesday .day-header { background: linear-gradient(135deg, #06ffa5, #00cc88); }
+        .thursday .day-header { background: linear-gradient(135deg, #ffd93d, #ff9500); }
+        .friday .day-header { background: linear-gradient(135deg, #a8e6cf, #7fcdcd); }
+        .saturday .day-header { background: linear-gradient(135deg, #ff8a80, #ff5722); }
+        .sunday .day-header { background: linear-gradient(135deg, #c471ed, #9c27b0); }
+
+        /* Course-specific border colors */
+        .course-item:nth-child(1) { border-left-color: #ff6b6b; }
+        .course-item:nth-child(2) { border-left-color: #48cae4; }
+        .course-item:nth-child(3) { border-left-color: #06ffa5; }
+        .course-item:nth-child(4) { border-left-color: #ffd93d; }
+
+        .sunday-schedule {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .time-slot {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .time-slot h4 {
+            color: #1976d2;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .schedule-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .sunday-schedule {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #feca57);
+            width: 0%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📅 7-Day Learning Schedule</h1>
+            <p>Your personalized course schedule - 2 hours daily commitment</p>
+        </div>
+
+        <div class="schedule-grid">
+            <!-- Monday -->
+            <div class="day-card monday">
+                <div class="day-header">
+                    <div class="day-name">Monday</div>
+                    <div class="day-time">7:00 PM - 9:00 PM</div>
+                </div>
+                <div class="day-content">
+                    <div class="course-item" onclick="openPlaylist('https://www.youtube.com/playlist?list=PLbtI3_MArDOkNtOan8BQkG6P8wf6pNVz-')">
+                        <div class="course-title">
+                            <span>💻</span>
+                            Front-End Development
+                        </div>
+                        <div class="course-time">7:00 PM - 9:00 PM (2 Hours)</div>
+                        <div class="course-description">Start the week with web fundamentals - HTML, CSS, JavaScript basics and responsive design principles.</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 15%;"></div>
+                        </div>
+                    </div>
+                    <div class="total-hours">Total: 2 Hours</div>
+                </div>
+            </div>
+
+            <!-- Tuesday -->
+            <div class="day-card tuesday">
+                <div class="day-header">
+                    <div class="day-name">Tuesday</div>
+                    <div class="day-time">7:00 PM - 9:00 PM</div>
+                </div>
+                <div class="day-content">
+                    <div class="course-item" onclick="openPlaylist('https://www.youtube.com/playlist?list=PLXYQL0f5BR7r3PlgHNsChApASAZLObCT2')">
+                        <div class="course-title">
+                            <span>✨</span>
+                            After Effects Tutorials
+                        </div>
+                        <div class="course-time">7:00 PM - 9:00 PM (2 Hours)</div>
+                        <div class="course-description">Learn motion graphics and visual effects - animations, compositing, and creative techniques.</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 25%;"></div>
+                        </div>
+                    </div>
+                    <div class="total-hours">Total: 2 Hours</div>
+                </div>
+            </div>
+
+            <!-- Wednesday -->
+            <div class="day-card wednesday">
+                <div class="day-header">
+                    <div class="day-name">Wednesday</div>
+                    <div class="day-time">7:00 PM - 9:00 PM</div>
+                </div>
+                <div class="day-content">
+                    <div class="course-item" onclick="openPlaylist('https://www.youtube.com/playlist?list=PLqsMVMnqpmEGeiYyqYWJv6Ye1vgzwIYn6')">
+                        <div class="course-title">
+                            <span>🍩</span>
+                            Blender Story: From Zero to Andy's Room
+                        </div>
+                        <div class="course-time">7:00 PM - 9:00 PM (2 Hours)</div>
+                        <div class="course-description">Mid-week 3D modeling session - create amazing scenes and learn Blender fundamentals.</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 35%;"></div>
+                        </div>
+                    </div>
+                    <div class="total-hours">Total: 2 Hours</div>
+                </div>
+            </div>
+
+            <!-- Thursday -->
+            <div class="day-card thursday">
+                <div class="day-header">
+                    <div class="day-name">Thursday</div>
+                    <div class="day-time">7:00 PM - 9:00 PM</div>
+                </div>
+                <div class="day-content">
+                    <div class="course-item" onclick="openPlaylist('https://www.youtube.com/playlist?list=PLsPHRLf6UN4k0_AfrTzLmK4iDV9J97-qR')">
+                        <div class="course-title">
+                            <span>🎭</span>
+                            Maya Tutorial for Beginners: 2020
+                        </div>
+                        <div class="course-time">7:00 PM - 9:00 PM (2 Hours)</div>
+                        <div class="course-description">Professional 3D software training - modeling, rigging, animation, and rendering techniques.</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 45%;"></div>
+                        </div>
+                    </div>
+                    <div class="total-hours">Total: 2 Hours</div>
+                </div>
+            </div>
+
+            <!-- Friday -->
+            <div class="day-card friday">
+                <div class="day-header">
+                    <div class="day-name">Friday</div>
+                    <div class="day-time">7:00 PM - 9:00 PM</div>
+                </div>
+                <div class="day-content">
+                    <div class="course-item" onclick="openPlaylist('https://www.youtube.com/playlist?list=PLsPHRLf6UN4kFesvCarnbyXLtVpjh5Ek-')">
+                        <div class="course-title">
+                            <span>🎮</span>
+                            Unreal Engine 5 Tutorial for Beginners
+                        </div>
+                        <div class="course-time">7:00 PM - 9:00 PM (2 Hours)</div>
+                        <div class="course-description">End the workweek with game development - blueprints, level design, and UE5 features.</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 55%;"></div>
+                        </div>
+                    </div>
+                    <div class="total-hours">Total: 2 Hours</div>
+                </div>
+            </div>
+
+            <!-- Saturday -->
+            <div class="day-card saturday">
+                <div class="day-header">
+                    <div class="day-name">Saturday</div>
+                    <div class="day-time">7:00 PM - 9:00 PM</div>
+                </div>
+                <div class="day-content">
+                    <div class="course-item" onclick="openPlaylist('https://www.youtube.com/playlist?list=PL2HeOArLswsVuHMZJAHNrkAoQ375mVpwJ')">
+                        <div class="course-title">
+                            <span>🎥</span>
+                            DaVinci Resolve 19
+                        </div>
+                        <div class="course-time">7:00 PM - 8:00 PM (1 Hour)</div>
+                        <div class="course-description">Professional video editing and color grading with DaVinci Resolve's latest features.</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 20%;"></div>
+                        </div>
+                    </div>
+                    <div class="course-item" onclick="openPlaylist('https://www.youtube.com/playlist?list=PLeWBNot0gcvYZB8rQ1M82w8r-DpAh3h9G')">
+                        <div class="course-title">
+                            <span>🔥</span>
+                            Nuke Tutorial For Beginner
+                        </div>
+                        <div class="course-time">8:00 PM - 9:00 PM (1 Hour)</div>
+                        <div class="course-description">Professional compositing and VFX using industry-standard Foundry Nuke.</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 30%;"></div>
+                        </div>
+                    </div>
+                    <div class="total-hours">Total: 2 Hours</div>
+                </div>
+            </div>
+
+            <!-- Sunday -->
+            <div class="day-card sunday">
+                <div class="day-header">
+                    <div class="day-name">Sunday</div>
+                    <div class="day-time">10:00 AM - 1:00 PM & 7:00 PM - 10:00 PM</div>
+                </div>
+                <div class="day-content">
+                    <div class="sunday-schedule">
+                        <div class="time-slot">
+                            <h4>Morning Session</h4>
+                            <p>10:00 AM - 1:00 PM</p>
+                        </div>
+                        <div class="time-slot">
+                            <h4>Evening Session</h4>
+                            <p>7:00 PM - 10:00 PM</p>
+                        </div>
+                    </div>
+                    
+                    <div class="course-item" onclick="openPlaylist('https://www.youtube.com/playlist?list=PLIM2vXFcUV_ZzVduxE_T_V05fY_U69XWD')">
+                        <div class="course-title">
+                            <span>🎨</span>
+                            SilhouetteFX Paint Basics Learning
+                        </div>
+                        <div class="course-time">10:00 AM - 11:30 AM (1.5 Hours)</div>
+                        <div class="course-description">Digital painting and compositing fundamentals with SilhouetteFX Paint.</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 40%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="course-item" onclick="openPlaylist('https://www.youtube.com/playlist?list=PLTKXtq-pvDm8Xa3vkXBPYuZSjQpGAPXgX')">
+                        <div class="course-title">
+                            <span>🎬</span>
+                            Boris FX Mocha Essentials - Getting Started
+                        </div>
+                        <div class="course-time">11:30 AM - 1:00 PM (1.5 Hours)</div>
+                        <div class="course-description">Professional motion tracking and rotoscoping with Boris FX Mocha.</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 50%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="course-item" onclick="openPlaylist('https://www.youtube.com/playlist?list=PLQEQSfeIXueN2iDM8HwFckLZsLg98gcTV')">
+                        <div class="course-title">
+                            <span>🌪️</span>
+                            Houdini Beginners
+                        </div>
+                        <div class="course-time">7:00 PM - 8:30 PM (1.5 Hours)</div>
+                        <div class="course-description">Procedural 3D modeling and VFX simulation with SideFX Houdini.</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 60%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="course-item" onclick="openPlaylist('https://www.youtube.com/playlist?list=PLqsMVMnqpmEFRwojIeAIogEKK6bsHIVXP')">
+                        <div class="course-title">
+                            <span>🎨</span>
+                            Blender Story | S2 | UV & Materials beginners
+                        </div>
+                        <div class="course-time">8:30 PM - 10:00 PM (1.5 Hours)</div>
+                        <div class="course-description">Advanced Blender techniques - UV mapping and material creation mastery.</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 70%;"></div>
+                        </div>
+                    </div>
+                    <div class="total-hours">Total: 6 Hours</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openPlaylist(url) {
+            window.open(url, '_blank');
+        }
+
+        // Add staggered animation for day cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const dayCards = document.querySelectorAll('.day-card');
+            
+            dayCards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.style.animation = 'slideInUp 0.6s ease-out forwards';
+            });
+
+            // Animate progress bars
+            setTimeout(() => {
+                const progressBars = document.querySelectorAll('.progress-fill');
+                progressBars.forEach(bar => {
+                    const width = bar.style.width;
+                    bar.style.width = '0%';
+                    setTimeout(() => {
+                        bar.style.width = width;
+                    }, 100);
+                });
+            }, 800);
+        });
+
+        // Add CSS for animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            .day-card {
+                opacity: 0;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
